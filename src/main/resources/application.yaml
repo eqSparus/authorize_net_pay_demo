@@ -1,0 +1,18 @@
+spring:
+  config:
+    import: "file:env.properties"
+  main:
+    banner-mode: off
+  application:
+    name: authorize_net_pay_demo
+#  datasource:
+#    url: postgresql://localhost:5432/testdb
+#    username: postgres
+#    password: rootroot
+
+server:
+  port: 1915
+
+authorizenet:
+  apiLoginId: ${API_LOGIN_ID}
+  transactionKey: ${TRANSACTION_KEY}

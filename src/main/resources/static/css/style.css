@@ -1,0 +1,27 @@
+.container {
+    display: flex;
+    flex-flow: column;
+    margin: 0 auto;
+    width: 40%;
+    padding: 16px;
+    border-radius: 12px;
+    background: #adadad;
+}
+
+.btn {
+    padding: 15px 20px;
+    font-size: 12pt;
+    color: white;
+    background: linear-gradient(90deg, rgba(29,103,227,1) 23%, rgba(22,60,124,1) 85%);
+    border: none;
+    border-radius: 12px;
+}
+
+.btn:hover {
+    cursor: pointer;
+    background: linear-gradient(90deg, rgba(22,60,124,1) 23%, rgba(29,103,227,1) 85%);
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
