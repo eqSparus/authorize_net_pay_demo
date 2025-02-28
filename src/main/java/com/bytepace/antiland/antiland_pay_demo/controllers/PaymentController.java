@@ -19,7 +19,11 @@ public class PaymentController {
     PaymentService paymentService;
 
     @ResponseStatus(code = HttpStatus.OK)
-    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(
+            path = "/token",
+            consumes = {MediaType.APPLICATION_JSON_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE}
+    )
     public PaymentDto buyRouter(@RequestBody PaymentRequest request) {
         return paymentService.processBuy(request.getAmount());
     }
