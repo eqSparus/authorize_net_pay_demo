@@ -34,12 +34,9 @@ dependencies {
 	// Web
 	implementation("org.springframework.boot:spring-boot-starter-web")
 
-	// Безопасность
-//	implementation("org.springframework.boot:spring-boot-starter-security")
-
 	// БД
-//	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-//	runtimeOnly("org.postgresql:postgresql")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	runtimeOnly("org.postgresql:postgresql")
 
 	// Тесты
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

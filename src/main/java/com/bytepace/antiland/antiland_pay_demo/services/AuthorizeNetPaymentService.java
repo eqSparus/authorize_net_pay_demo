@@ -1,8 +1,14 @@
 package com.bytepace.antiland.antiland_pay_demo.services;
 
+import com.bytepace.antiland.antiland_pay_demo.database.entities.PaymentDb;
+import com.bytepace.antiland.antiland_pay_demo.database.repositories.PaymentRepository;
+import com.bytepace.antiland.antiland_pay_demo.domain.PaymentStatus;
+import com.bytepace.antiland.antiland_pay_demo.models.AuthorizeNetRequest;
 import com.bytepace.antiland.antiland_pay_demo.models.PaymentDto;
+import com.bytepace.antiland.antiland_pay_demo.models.TokenDto;
 import com.bytepace.antiland.antiland_pay_demo.services.exception.ApiPaymentException;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import net.authorize.Environment;
 import net.authorize.api.contract.v1.*;
@@ -13,9 +19,11 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Service
+@AllArgsConstructor
 public class AuthorizeNetPaymentService implements PaymentService {
 
     @Value("${authorizenet.apiLoginId}")
@@ -24,8 +32,10 @@ public class AuthorizeNetPaymentService implements PaymentService {
     @Value("${authorizenet.transactionKey}")
     String apiTransactionKey;
 
+    final PaymentRepository paymentRepository;
+
     @Override
-    public PaymentDto processBuy(Double amount) {
+    public TokenDto getAuthToken(Double amount, String productId) {
         ApiOperationBase.setEnvironment(Environment.SANDBOX);
 
         var merchantAuthenticationType = new MerchantAuthenticationType();
@@ -35,7 +45,8 @@ public class AuthorizeNetPaymentService implements PaymentService {
 
         var txnRequest = new TransactionRequestType();
         txnRequest.setTransactionType(TransactionTypeEnum.AUTH_CAPTURE_TRANSACTION.value());
-        txnRequest.setAmount(new BigDecimal(amount).setScale(2, RoundingMode.CEILING));
+        var amountBigDecimal = new BigDecimal(amount).setScale(2, RoundingMode.CEILING);
+        txnRequest.setAmount(amountBigDecimal);
 
         var apiRequest = new GetHostedPaymentPageRequest();
         apiRequest.setTransactionRequest(txnRequest);
@@ -49,16 +60,38 @@ public class AuthorizeNetPaymentService implements PaymentService {
         if (response != null) {
             var code = response.getMessages().getResultCode();
             if (code == MessageTypeEnum.OK) {
-                return PaymentDto.builder()
+                var orderId = UUID.randomUUID().toString();
+                var payment = PaymentDb.builder()
+                        .orderId(orderId)
+                        .amount(amountBigDecimal)
+                        .productId(productId)
+                        .status(PaymentStatus.AUTHORIZED)
+                        .build();
+                paymentRepository.save(payment);
+                return TokenDto.builder()
                         .message("payment_page_success")
                         .token(response.getToken())
+                        .orderId(orderId)
                         .build();
             } else {
+                System.err.println(response.getMessages().getMessage().get(0).getText());
                 throw new ApiPaymentException("payment_page_failed_code_" + code);
             }
         } else {
             throw new ApiPaymentException("payment_page_failed_response_null");
         }
+    }
+
+    @Override
+    public PaymentDto getPayment(String orderId) {
+        var paymentDb = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ApiPaymentException("payment_not_found"));
+        return PaymentDto.of(paymentDb);
+    }
+
+    @Override
+    public void updateStatus(AuthorizeNetRequest request) {
+
     }
 
     private static ArrayOfSetting getArrayOfSetting() {

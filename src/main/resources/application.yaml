@@ -5,10 +5,13 @@ spring:
     banner-mode: off
   application:
     name: authorize_net_pay_demo
-#  datasource:
-#    url: postgresql://localhost:5432/testdb
-#    username: postgres
-#    password: rootroot
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql
 
 server:
   port: 1915

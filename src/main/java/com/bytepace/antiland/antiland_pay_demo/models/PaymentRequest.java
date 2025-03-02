@@ -10,10 +10,14 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public class PaymentRequest {
 
-    private Double amount;
+    Double amount;
+    String productId;
 
     @JsonCreator
-    public PaymentRequest(@JsonProperty(value = "amount", required = true) Double amount) {
+    public PaymentRequest(
+            @JsonProperty(value = "amount", required = true) Double amount,
+            @JsonProperty(value = "productId", required = true) String productId) {
         this.amount = amount;
+        this.productId = productId;
     }
 }
